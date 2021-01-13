@@ -2,6 +2,7 @@ import discord
 import os
 import json
 import time
+import sys
 from configparser import ConfigParser
 from datetime import datetime
 from discord.ext import commands
@@ -10,7 +11,17 @@ from operator import itemgetter
 from pathlib import Path
 
 config = ConfigParser()
-config.read("config.cfg")
+
+try:
+    cfg = open("config.ini")
+except FileNotFoundError:
+    with open("config.ini", "a") as cfg:
+        print("[bot]\ntoken= InsertTokenHere\ncommandPrefix= =\nchannelID= InsertChannelID", file=cfg)
+        print("Please setup config.ini before continueing.\nClosing in 10 seconds...")
+        time.sleep(10)
+        exit()
+finally:
+    cfg.close()
 
 TOKEN = config.get("bot","token")
 
@@ -69,7 +80,7 @@ async def _list(ctx):
             output += str(value["username"]) + " | " + str(datetime.fromtimestamp(value["time"])) + "\n"
 
         list_embed = discord.Embed(
-        title = "The Dawns Awakening - Waiting list",
+        title = "Waiting list",
         description = output,
         colour = 0xff55ff
         )
@@ -82,7 +93,7 @@ async def _list(ctx):
 async def help(ctx):
 
     if ctx.channel.id == int(config.get("bot", "channelID")):
-        help_embed = discord.Embed(title="The Dawns Awakening - Waiting list", colour=0xff55ff)
+        help_embed = discord.Embed(title="Waiting list", colour=0xff55ff)
         help_embed.add_field(name="Help", value="\"" + config.get("bot","commandPrefix") + "help\" Shows this message", inline=False)
         help_embed.add_field(name="Add", value="\"" + config.get("bot","commandPrefix") + "add {username}\" will add a player to the waiting list", inline=True)
         help_embed.add_field(name="Remove", value="\"" + config.get("bot","commandPrefix") +"remove {username}\" will remove a player from the waiting list", inline=True)
